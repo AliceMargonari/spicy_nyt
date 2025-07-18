@@ -58,20 +58,23 @@
 const startTime = Date.now();
 const urlParams = new URLSearchParams(window.location.search);
 const pid = urlParams.get("pid");
+const condition = urlParams.get("condition") || "unknown";  // fallback if missing
 
 window.addEventListener("beforeunload", () => {
   const duration = Math.round((Date.now() - startTime) / 1000);
+
   fetch("https://script.google.com/macros/s/AKfycbzf6Tx1YGwB2861zY8sxreDoxj-udTPL_umKpz1k7gcHArbqORDKaVjzKnY_wv_VIEuHQ/exec", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       pid: pid,
+      condition: condition,
       page: window.location.pathname.replaceAll("/", ""),
       time_spent: duration,
       timestamp: new Date().toISOString()
-      })
-    });
-  }
+    })
+  });
+});
 </script>
 <body>
   <div class="logo">
