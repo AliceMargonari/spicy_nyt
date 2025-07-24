@@ -54,28 +54,6 @@
     }
   </style>
 </head>
-<script>
-const startTime = Date.now();
-const urlParams = new URLSearchParams(window.location.search);
-const pid = urlParams.get("pid");
-const condition = urlParams.get("condition") || "unknown";  // fallback if missing
-
-window.addEventListener("beforeunload", () => {
-  const duration = Math.round((Date.now() - startTime) / 1000);
-
-  fetch("https://script.google.com/macros/s/AKfycbzf6Tx1YGwB2861zY8sxreDoxj-udTPL_umKpz1k7gcHArbqORDKaVjzKnY_wv_VIEuHQ/exec", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      pid: pid,
-      condition: condition,
-      page: window.location.pathname.replaceAll("/", ""),
-      time_spent: duration,
-      timestamp: new Date().toISOString()
-    })
-  });
-});
-</script>
 <body>
   <div class="logo">
     <img src="nyt-logo.png" alt="The New York Times Logo">
@@ -92,3 +70,41 @@ window.addEventListener("beforeunload", () => {
   <p style="text-transform: uppercase; color: blue; margin-bottom: 30px;">
   You may now close this tab and return to the survey  
   </p>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const prolific_pid = params.get("prolific_pid");
+  const condition = params.get("condition");
+  const page_name = params.get("page_name");
+
+  const entryTime = new Date();
+
+  const entryIds = {
+    prolific_pid: "entry.434492044",
+    condition: "entry.1225575535",
+    page_name: "entry.925161350",
+    entry_time: "entry.732388184",
+    exit_time: "entry.372350073",
+    time_spent: "entry.298480214"
+  };
+
+  window.addEventListener("unload", function () {
+    const exitTime = new Date();
+    const timeSpent = Math.round((exitTime - entryTime) / 1000);
+
+    const formData = new FormData();
+    formData.append(entryIds.prolific_pid, prolific_pid);
+    formData.append(entryIds.condition, condition);
+    formData.append(entryIds.page_name, page_name);
+    formData.append(entryIds.entry_time, entryTime.toISOString());
+    formData.append(entryIds.exit_time, exitTime.toISOString());
+    formData.append(entryIds.time_spent, timeSpent);
+
+    navigator.sendBeacon(
+      "https://docs.google.com/forms/d/e/1FAIpQLSfPfKcw2oVlFINPNThg4q0FgfVdxxCCLn40vwPY6nXEH2ybeQ/formResponse",
+      new URLSearchParams(formData)
+    );
+  });
+</script>
+
+</body>
+</html>
